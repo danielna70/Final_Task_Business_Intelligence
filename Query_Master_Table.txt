@@ -1,0 +1,115 @@
+
+-- Create Master Table and combine 4 tables (Customers, Orders, ProductCategory, Products) containing sales information   
+
+CREATE OR REPLACE TABLE `pbi-bank-muamalat-rakimin.Final_Task.master_table` AS
+SELECT
+    o.Date AS order_date,
+    pc.CategoryName AS category_name,
+    p.ProdName AS product_name,
+    p.Price AS product_price,
+    o.Quantity AS order_qty,
+    (o.Quantity * p.Price) AS total_sales,
+    c.CustomerEmail AS cust_email,
+    c.CustomerCity AS cust_city
+FROM
+    `pbi-bank-muamalat-rakimin.Final_Task.Orders` o
+JOIN
+    `pbi-bank-muamalat-rakimin.Final_Task.Customers` c ON o.CustomerID = c.CustomerID
+JOIN
+    `pbi-bank-muamalat-rakimin.Final_Task.Products` p ON o.ProdNumber = p.ProdNumber
+JOIN
+    `pbi-bank-muamalat-rakimin.Final_Task.ProductCategory` pc ON p.Category = pc.CategoryID
+ORDER BY
+    o.Date ASC;
+  
+
+-- Show Master Table
+
+SELECT * FROM `pbi-bank-muamalat-rakimin.Final_Task.master_table`
+
+
+-- Cutomers With Highest Total Sales
+
+SELECT 
+    mt.cust_email,
+    CONCAT(c.FirstName, ' ', c.LastName) AS customer_name,
+    SUM(mt.order_qty) AS total_quantity,
+    SUM(mt.total_sales) AS total_sales
+FROM
+    `pbi-bank-muamalat-rakimin.Final_Task.master_table` mt
+JOIN
+    `pbi-bank-muamalat-rakimin.Final_Task.Customers` c ON mt.cust_email = c.CustomerEmail
+GROUP BY
+    mt.cust_email, customer_name
+ORDER BY 
+    total_sales DESC;
+
+
+
+-- Cutomers With Highest Total Quantity
+
+SELECT 
+    mt.cust_email,
+    CONCAT(c.FirstName, ' ', c.LastName) AS customer_name,
+    SUM(mt.order_qty) AS total_quantity,
+    SUM(mt.total_sales) AS total_sales
+FROM
+    `pbi-bank-muamalat-rakimin.Final_Task.master_table` mt
+JOIN
+    `pbi-bank-muamalat-rakimin.Final_Task.Customers` c ON mt.cust_email = c.CustomerEmail
+GROUP BY
+    mt.cust_email, customer_name
+ORDER BY 
+    total_quantity DESC;
+
+    
+
+-- Total Sales
+
+SELECT SUM(total_sales)
+FROM `pbi-bank-muamalat-rakimin.Final_Task.master_table`
+
+-- AOV Master Table
+
+SELECT SUM(total_sales)/SUM(order_qty) AS AOV
+FROM `pbi-bank-muamalat-rakimin.Final_Task.master_table`
+
+-- Total Product Price, AOQ, Total Sales, AOV Master Table
+
+SELECT 
+    ROUND(SUM(product_price), 2) AS total_product_price,
+    ROUND(SUM(order_qty), 2) AS AOQ,
+    ROUND(SUM(product_price * order_qty), 2) AS total_sales,
+    ROUND(SUM(product_price * order_qty) / SUM(order_qty), 2) AS AOV
+FROM 
+    `pbi-bank-muamalat-rakimin.Final_Task.master_table`
+
+-- AOV Join Table
+
+SELECT
+    SUM(order_total) / COUNT(DISTINCT OrderID) AS average_order_value
+FROM (
+    SELECT
+        O.OrderID,
+        SUM(O.Quantity * P.Price) AS order_total
+    FROM
+        `pbi-bank-muamalat-rakimin.Final_Task.Orders` O
+    JOIN
+        `pbi-bank-muamalat-rakimin.Final_Task.Products` P ON O.ProdNumber = P.ProdNumber
+    GROUP BY
+        O.OrderID
+);
+
+-- AOQ Join Table
+
+SELECT
+    AVG(order_qty) AS average_order_quantity
+FROM (
+    SELECT
+        OrderID,
+        SUM(Quantity) AS order_qty
+    FROM
+        `pbi-bank-muamalat-rakimin.Final_Task.Orders`
+    GROUP BY
+        OrderID
+);
