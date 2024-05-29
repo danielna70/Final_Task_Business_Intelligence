@@ -1,4 +1,3 @@
-
 -- Create Master Table and combine 4 tables (Customers, Orders, ProductCategory, Products) containing sales information   
 
 CREATE OR REPLACE TABLE `pbi-bank-muamalat-rakimin.Final_Task.master_table` AS
@@ -28,7 +27,7 @@ ORDER BY
 SELECT * FROM `pbi-bank-muamalat-rakimin.Final_Task.master_table`
 
 
--- Cutomers With Highest Total Sales
+-- Customers With Highest Total Sales
 
 SELECT 
     mt.cust_email,
@@ -46,7 +45,7 @@ ORDER BY
 
 
 
--- Cutomers With Highest Total Quantity
+-- Customers With Highest Total Quantity
 
 SELECT 
     mt.cust_email,
